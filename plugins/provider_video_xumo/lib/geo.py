@@ -56,9 +56,10 @@ class Geo:
             login_headers = {'Content-Type': 'application/json', 'User-agent': utils.DEFAULT_USER_AGENT}
             req = urllib.request.Request(geo_url, headers=login_headers)
             with urllib.request.urlopen(req, timeout=5) as resp:
-                results = json.loads(
-                    re.findall(b'__JOBS_REHYDRATE_STATE__=(.+?);</script>', (resp.read()), flags=re.DOTALL)[0])
-            self.geoId, self.channelListId = results["jobs"]["1"]["data"]["geoId"], results["jobs"]["1"]["data"]["channelListId"]
-            self.config_obj.write(self.section, 'geoid', self.geoId)
-            self.config_obj.write(self.section, 'channellistid', self.channelListId)
+                matchOrg = re.findall(b'__JOBS_REHYDRATE_STATE__=(.+?);</script>', (resp.read()), flags=re.DOTALL)
+                if len(matchOrg) > 0:
+                    results = json.loads(matchOrg[0])
+                    self.geoId, self.channelListId = results["jobs"]["1"]["data"]["geoId"], results["jobs"]["1"]["data"]["channelListId"]
+                    self.config_obj.write(self.section, 'geoid', self.geoId)
+                    self.config_obj.write(self.section, 'channellistid', self.channelListId)
         
